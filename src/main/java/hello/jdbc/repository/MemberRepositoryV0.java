@@ -3,8 +3,10 @@ package hello.jdbc.repository;
 import hello.jdbc.connection.DBConnectionUtil;
 import hello.jdbc.domain.Member;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.session.NonUniqueSessionRepositoryException;
 
 import java.sql.*;
+import java.util.NoSuchElementException;
 
 /**
  * JDBC 개발 - 등록
@@ -28,14 +30,50 @@ public class MemberRepositoryV0 {
             pstmt.setString(1, member.getMemberId()); // values 뒤에 ?인 파라미터 바인딩하기
             pstmt.setInt(2, member.getMoney());
             pstmt.executeUpdate(); // 실행 - 쿼리가 실제 데이터베이스에 실행이 된다, Statement 를 통해 준비된 SQL을 커넥션을 통해 실제 데이터베이스에 전달
+            // executeUpdate()는 데이터 변경할 때 사용
             return member;
         } catch (SQLException e) {
-            log.info("db error", e); // 확인용 로그
+            log.error("db error", e); // 확인용 로그
             throw e; // 예외를 밖으로 던진다.
         } finally {
             // 중요. 시간 역순으로 클로즈 해준다.
             // 외부 리소르를 쓰는 거다. 실제 TCP/IP connection에 걸려서 쓰는거다.
             close(con, pstmt, null);
+        }
+    }
+
+    // JDBC 개발 - 조회
+    // 회원 조회
+    public Member findById(String memberId) throws SQLException {
+        String sql = "select * from member where member_id = ?"; // 회원 한명 조회
+
+        // 밖에 Connection 선언하는 이유 try/catch 문에서 finally에서 con을 호출해야해서
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try {
+            con = getConnection();
+            pstmt = con.prepareStatement(sql);// con을 통해서 prepareStatement()를 얻어야 한다.
+            pstmt.setString(1, memberId);
+
+            // 실행
+            // rs - select 쿼리의 결과를 담고 있는 통이다.
+            rs = pstmt.executeQuery();// select 시 사용
+            // 데이터 꺼내기
+            if (rs.next()) { // rs.next() - 실제 데이터가 있는 곳에서 시작한다, 한번은 호출해야 한다. 데이터가 있으면 true
+                Member member = new Member();
+                member.setMemberId(rs.getString("member_id"));
+                member.setMoney(rs.getInt("money"));
+                return member;
+            } else { // 데이터가 없을 때
+                throw new NoSuchElementException("member not found memberId = " + memberId);
+            }
+        } catch (SQLException e) {
+            log.error("db error", e);
+            throw e;
+        } finally { // 리소스 close 해주기
+            close(con, pstmt, rs);
         }
     }
 
