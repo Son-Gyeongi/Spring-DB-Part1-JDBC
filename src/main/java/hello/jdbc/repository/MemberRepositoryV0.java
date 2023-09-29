@@ -77,6 +77,51 @@ public class MemberRepositoryV0 {
         }
     }
 
+    // JDBC 개발 - 수정, 삭제
+    // 회원 변경
+    public void update(String memberId, int money) throws SQLException {
+        String sql = "update member set money=? where member_id=?";
+
+        Connection con = null;
+        PreparedStatement pstmt = null;
+
+        try {
+            con = getConnection();
+            pstmt = con.prepareStatement(sql);
+            pstmt.setInt(1, money);
+            pstmt.setString(2, memberId);
+            int resultSize = pstmt.executeUpdate(); // 쿼리를 실행하고 영향받은 row수를 반환
+            log.info("resultSize = {}", resultSize);
+        } catch (SQLException e) {
+            log.error("db error", e);
+            throw e;
+        } finally {
+            close(con, pstmt, null);
+        }
+    }
+
+    // JDBC 개발 - 수정, 삭제
+    // 회원 삭제
+    public void delete(String memberId) throws SQLException {
+        String sql = "delete from member where member_id=?";
+
+        Connection con = null;
+        PreparedStatement pstmt = null;
+
+        try {
+            con = getConnection();
+            pstmt = con.prepareStatement(sql);
+            pstmt.setString(1, memberId);
+
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            log.error("db error", e);
+            throw e;
+        } finally {
+            close(con, pstmt, null);
+        }
+    }
+
     // Connection 닫아주기 - 사용한 자원들을 다 닫아줘야 한다.
     private void close(Connection con, Statement stmt, ResultSet rs) {
         // Statement는 sql을 그대로 넣는거다. PreparedStatement는 파라미터를 바인딩 할 수 있다.(PreparedStatement는 Statement를 상속받았다.)

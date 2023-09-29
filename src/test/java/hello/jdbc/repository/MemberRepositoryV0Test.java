@@ -6,6 +6,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.sql.SQLException;
+import java.util.NoSuchElementException;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -23,7 +24,7 @@ class MemberRepositoryV0Test {
     void crud() throws SQLException {
         // JDBC 개발 - 등록
         // 회원 저장 - save()
-        Member member = new Member("memberV4", 10000);
+        Member member = new Member("memberV100", 10000);
         repository.save(member);
 
         // JDBC 개발 - 조회
@@ -34,5 +35,20 @@ class MemberRepositoryV0Test {
         log.info("member == findMember = {}", member == findMember); // false
         log.info("member.equals(findMember) = {}", member.equals(findMember)); // true
         assertThat(findMember).isEqualTo(member);
+
+        // JDBC 개발 - 수정, 삭제
+        // 회원 변경 - update() / money 10000 -> 20000
+        repository.update(member.getMemberId(), 20000);
+        // 검증
+        Member updateMember = repository.findById(member.getMemberId());
+        assertThat(updateMember.getMoney()).isEqualTo(20000);
+
+        // JDBC 개발 - 수정, 삭제
+        // 회원 삭제 - delete()
+        repository.delete(member.getMemberId());
+        // 검증
+//        Member deletedMember = repository.findById(member.getMemberId()); // 삭제해서 NoSuchElementException 예외가 뜬다.
+        assertThatThrownBy(() -> repository.findById(member.getMemberId()))
+                .isInstanceOf(NoSuchElementException.class); // NoSuchElementException 예외가 터져야 정상
     }
 }
