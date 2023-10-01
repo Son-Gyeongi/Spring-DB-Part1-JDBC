@@ -28,11 +28,12 @@ public class ConnectionTest {
     // 이번에는 스프링이 제공하는 '데이터 소스가 적용이 된' DriverManager를 사용하는
     // DriverManagerDataSource 사용해보자.
     @Test
-    void dataSourceDriverManager() {
+    void dataSourceDriverManager() throws SQLException {
         // DriverManager에서 바로 쓴다.
         // DriverManagerDataSource(스프링에서 제공) - 항상 새로운 커넥션을 획득한다, DataSource를 구현했다.
         DriverManagerDataSource dataSource = new DriverManagerDataSource(URL, USERNAME, PASSWORD);
 //        DataSource dataSource = new DriverManagerDataSource(URL, USERNAME, PASSWORD);
+        useDataSource(dataSource);
     }
 
     private void useDataSource(DataSource dataSource) throws SQLException {
