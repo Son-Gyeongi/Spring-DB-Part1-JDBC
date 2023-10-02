@@ -17,6 +17,7 @@ import java.util.NoSuchElementException;
 public class MemberRepositoryV1 {
 
     // 먼저 DataSource 사용하려면 의존관계 주입을 받아야 한다.
+    // DataSource(커넥션을 획득하는 방법을 추상화하는 인터페이스) - 애플리케이션 코드를 변경할 필요없다.
     private final DataSource dataSource;
 
     public MemberRepositoryV1(DataSource dataSource) {
@@ -50,7 +51,6 @@ public class MemberRepositoryV1 {
         }
     }
 
-    // JDBC 개발 - 조회
     // 회원 조회
     public Member findById(String memberId) throws SQLException {
         String sql = "select * from member where member_id = ?"; // 회원 한명 조회
@@ -85,7 +85,6 @@ public class MemberRepositoryV1 {
         }
     }
 
-    // JDBC 개발 - 수정, 삭제
     // 회원 변경
     public void update(String memberId, int money) throws SQLException {
         String sql = "update member set money=? where member_id=?";
@@ -108,7 +107,6 @@ public class MemberRepositoryV1 {
         }
     }
 
-    // JDBC 개발 - 수정, 삭제
     // 회원 삭제
     public void delete(String memberId) throws SQLException {
         String sql = "delete from member where member_id=?";
