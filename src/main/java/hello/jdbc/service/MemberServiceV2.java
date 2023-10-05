@@ -25,6 +25,7 @@ public class MemberServiceV2 {
     // fromId 회원을 조회해서 toId 회원에게 money만큼의 돈을 계좌이체하는 로직이다.
     public void accountTransfer(String fromId, String toId, int money) throws SQLException {
         // 데이터 소스 필요, 데이터 소스에서 커넥션 받아온다.
+        // 같은 커넥션을 리포지토리까지 유지해야지 같은 트랜잭션이 유지된다.
         Connection con = dataSource.getConnection();
         try {
             con.setAutoCommit(false); // false(수동커밋) - 트랜잭션 시작
