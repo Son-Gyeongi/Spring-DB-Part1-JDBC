@@ -66,14 +66,4 @@ public class MemberServiceV3_1 {
             throw new IllegalStateException("이체중 예외 발생");
         }
     }
-
-    private void release(Connection con) {
-        if (con != null) {
-            try {
-                con.setAutoCommit(true); // 자동 커밋, 커넥션 풀 고려
-            } catch (Exception e) {
-                log.info("error", e);
-            }
-        }
-    }
 }

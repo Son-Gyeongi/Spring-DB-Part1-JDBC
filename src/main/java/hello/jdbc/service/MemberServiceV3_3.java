@@ -3,23 +3,20 @@ package hello.jdbc.service;
 import hello.jdbc.domain.Member;
 import hello.jdbc.repository.MemberRepositoryV3;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 
 /**
- * 트랜잭션 문제 해결 - 트랜잭션 템플릿
+ * 트랜잭션 문제 해결 - 트랜잭션 AOP 적용
+ * 트랜잭션 - @Transactional AOP 적용
  */
 @Slf4j
-public class MemberServiceV3_2 {
+public class MemberServiceV3_3 {
 
-    private final TransactionTemplate txTemplate;
     private final MemberRepositoryV3 memberRepository;
 
-    public MemberServiceV3_2(PlatformTransactionManager transactionManager, MemberRepositoryV3 memberRepository) {
-        this.txTemplate = new TransactionTemplate(transactionManager);
+    public MemberServiceV3_3(MemberRepositoryV3 memberRepository) {
         this.memberRepository = memberRepository;
     }
 
@@ -27,15 +24,8 @@ public class MemberServiceV3_2 {
     // from 보내는 곳 to 받는 곳 money 얼마 보낼건가
     // fromId 회원을 조회해서 toId 회원에게 money만큼의 돈을 계좌이체하는 로직이다.
     public void accountTransfer(String fromId, String toId, int money) throws SQLException {
-        // executeWithoutResult()에서 시작과 커밋,롤백을 한다.
-        txTemplate.executeWithoutResult((status) -> {
-            // 비즈니스 로직
-            try {
-                bizLogic(fromId, toId, money);
-            } catch (SQLException e) {
-                throw new IllegalStateException(); // 예외 던지기
-            }
-        });
+        // 비즈니스 로직
+        bizLogic(fromId, toId, money);
     }
 
     // 비즈니스 로직
