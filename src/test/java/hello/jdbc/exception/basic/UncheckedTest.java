@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.*;
+
 /**
  * 자바 예외 이해 - 언체크 예외 기본 이해
  * // 체크 예외든 언체크 예외든 모든 예외는 잡거나 던진거나 둘 중에 하나를 한다.
@@ -22,7 +24,7 @@ public class UncheckedTest {
     void unchecked_throw() {
         Service service = new Service();
 //        service.callThrow(); // 예외 발생
-        Assertions.assertThatThrownBy(() -> service.callThrow())
+        assertThatThrownBy(() -> service.callThrow())
                 .isInstanceOf(MyUncheckedException.class);
     }
 
