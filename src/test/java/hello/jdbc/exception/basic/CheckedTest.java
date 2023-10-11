@@ -45,7 +45,7 @@ public class CheckedTest {
 
     // 서비스, 레파지토리 가상의 코드를 만들어보자.
     /**
-     * Service 에서 Checked 예외는
+     * Checked 예외는
      * 예외를 잡아서 처리하거나, 던지거나 둘중 하나를 필수로 선택해야 한다.
      */
     static class Service {
