@@ -1,6 +1,7 @@
 package hello.jdbc.repository;
 
 import hello.jdbc.domain.Member;
+import hello.jdbc.repository.ex.MyDbException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.JdbcUtils;
@@ -13,9 +14,11 @@ import java.util.NoSuchElementException;
  * 스프링과 문제 해결 (예외 처리, 반복) - 런타임 예외 적용
  * 예외 누수 문제 해결
  * 체크 예외를 런타임 예외로 변경
+ * MemberRepository 인터페이스 사용
+ * throws SQLException 제거
  */
 @Slf4j
-public class MemberRepositoryV4_1 {
+public class MemberRepositoryV4_1 implements MemberRepository {
 
     // 먼저 DataSource 사용하려면 의존관계 주입을 받아야 한다.
     // DataSource(커넥션을 획득하는 방법을 추상화하는 인터페이스) - 애플리케이션 코드를 변경할 필요없다.
@@ -26,7 +29,8 @@ public class MemberRepositoryV4_1 {
     }
 
     // 회원 저장
-    public Member save(Member member) throws SQLException {
+    @Override // 인터페이스 사용시 @Override 사용하는 게 좋다. 컴파일러가 구현된 게 안 맞으면 오류를 내준다.
+    public Member save(Member member) {
         // sql 작성
         String sql = "insert into member(member_id, money) values (?, ?)";
 
@@ -43,8 +47,8 @@ public class MemberRepositoryV4_1 {
             // executeUpdate()는 데이터 변경할 때 사용
             return member;
         } catch (SQLException e) {
-            log.error("db error", e); // 확인용 로그
-            throw e; // 예외를 밖으로 던진다.
+            throw new MyDbException(e); // 런타임 예외로 변경
+            // 예외 변환 시 기존 예외(e) 꼭 포함해야 한다.
         } finally {
             // 중요. 시간 역순으로 클로즈 해준다.
             // 외부 리소르를 쓰는 거다. 실제 TCP/IP connection에 걸려서 쓰는거다.
@@ -53,7 +57,8 @@ public class MemberRepositoryV4_1 {
     }
 
     // 회원 조회
-    public Member findById(String memberId) throws SQLException {
+    @Override
+    public Member findById(String memberId) {
         String sql = "select * from member where member_id = ?"; // 회원 한명 조회
 
         // 밖에 Connection 선언하는 이유 try/catch 문에서 finally에서 con을 호출해야해서
@@ -79,15 +84,15 @@ public class MemberRepositoryV4_1 {
                 throw new NoSuchElementException("member not found memberId = " + memberId);
             }
         } catch (SQLException e) {
-            log.error("db error", e);
-            throw e;
+            throw new MyDbException(e);
         } finally { // 리소스 close 해주기
             close(con, pstmt, rs);
         }
     }
 
     // 회원 변경
-    public void update(String memberId, int money) throws SQLException {
+    @Override
+    public void update(String memberId, int money) {
         String sql = "update member set money=? where member_id=?";
 
         Connection con = null;
@@ -101,15 +106,15 @@ public class MemberRepositoryV4_1 {
             int resultSize = pstmt.executeUpdate(); // 쿼리를 실행하고 영향받은 row수를 반환
             log.info("resultSize = {}", resultSize);
         } catch (SQLException e) {
-            log.error("db error", e);
-            throw e;
+            throw new MyDbException(e);
         } finally {
             close(con, pstmt, null);
         }
     }
 
     // 회원 삭제
-    public void delete(String memberId) throws SQLException {
+    @Override
+    public void delete(String memberId) {
         String sql = "delete from member where member_id=?";
 
         Connection con = null;
@@ -122,8 +127,7 @@ public class MemberRepositoryV4_1 {
 
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            log.error("db error", e);
-            throw e;
+            throw new MyDbException(e);
         } finally {
             close(con, pstmt, null);
         }
